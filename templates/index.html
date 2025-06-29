@@ -1,152 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Troika Hospital Chatbot</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Troika Hospital Chat</title>
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
+    /* ---------- base ---------- */
+    *{box-sizing:border-box;font-family:"Segoe UI",sans-serif;margin:0;padding:0}
+    body{background:#ece9f5;height:100vh;display:flex;justify-content:flex-end;align-items:flex-end;padding:24px}
+
+    /* ---------- chat shell ---------- */
+    #chatBox{
+      width:360px;max-height:560px;
+      display:flex;flex-direction:column;
+      position:fixed;bottom:32px;right:32px;z-index:999;
+      background:#fff;border-radius:20px;overflow:hidden;
+      box-shadow:0 12px 32px rgba(0,0,0,.15)
     }
 
-    /* Floating button */
-    #chatToggle {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #0073aa;
-      color: #fff;
-      border: none;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      font-size: 26px;
-      cursor: pointer;
-      z-index: 1000;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    /* header */
+    #chatHeader{
+      background:linear-gradient(135deg,#7e5bef,#5d3eff);
+      padding:22px 24px;color:#fff;font-weight:700;font-size:18px;line-height:1.1;
+      position:relative
+    }
+    #chatHeader small{display:block;font-weight:400;font-size:14px;opacity:.85}
+    #chatHeader::after{
+      content:"";width:10px;height:10px;border-radius:50%;
+      background:#00ff80;position:absolute;top:24px;right:24px
     }
 
-    /* Chat box */
-    #chatBox {
-      display: none;
-      position: fixed;
-      bottom: 90px;
-      right: 20px;
-      width: 350px;
-      max-height: 500px;
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      background: #fff;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-      z-index: 999;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+    /* message area */
+    #chatMessages{
+      flex:1;padding:18px;overflow-y:auto;background:#f9f9fb;display:flex;flex-direction:column;gap:12px
+    }
+    #chatMessages .user{
+      align-self:flex-end;background:linear-gradient(135deg,#7e5bef,#5d3eff);color:#fff;
+      padding:12px 16px;border-radius:16px 16px 2px 16px;max-width:78%;box-shadow:0 2px 6px rgba(0,0,0,.1)
+    }
+    #chatMessages .bot{
+      align-self:flex-start;background:#fff;color:#333;
+      padding:12px 16px;border-radius:16px 16px 16px 2px;max-width:78%;box-shadow:0 2px 6px rgba(0,0,0,.1)
     }
 
-    #chatHeader {
-      background: #0073aa;
-      color: white;
-      padding: 12px;
-      font-weight: bold;
-      text-align: center;
+    /* footer */
+    #chatForm{display:flex;padding:12px 16px;border-top:1px solid #e2e3e8;background:#fff;gap:10px}
+    #chatForm textarea{
+      flex:1;border:1px solid #ccc;border-radius:24px;resize:none;padding:11px 16px;font-size:14px;outline:none
     }
-
-    #chatMessages {
-      padding: 10px;
-      flex: 1;
-      overflow-y: auto;
-      font-size: 14px;
+    #chatForm button{
+      background:#fd5e6b;color:#fff;border:none;padding:0 24px;border-radius:24px;font-weight:600;cursor:pointer
     }
-
-    #chatForm {
-      display: flex;
-      border-top: 1px solid #ddd;
-    }
-
-    #chatForm textarea {
-      flex: 1;
-      padding: 8px;
-      border: none;
-      resize: none;
-      font-size: 14px;
-    }
-
-    #chatForm button {
-      background: #0073aa;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      cursor: pointer;
-    }
-
-    .bot {
-      margin: 8px 0;
-      color: #333;
-    }
-
-    .user {
-      text-align: right;
-      margin: 8px 0;
-      color: #0073aa;
-    }
+    #chatForm button:hover{background:#e94b58}
   </style>
 </head>
 <body>
 
-<!-- Floating button -->
-<button id="chatToggle">💬</button>
+  <div id="chatBox">
+    <div id="chatHeader">
+      TROIKA<br><small>AI Assistant</small>
+    </div>
 
-<!-- Chat window -->
-<div id="chatBox">
-  <div id="chatHeader">Troika Hospital Chat</div>
-  <div id="chatMessages"></div>
-  <form id="chatForm">
-    <textarea name="message" placeholder="Ask something..." rows="1" required></textarea>
-    <button type="submit">Send</button>
-  </form>
-</div>
+    <div id="chatMessages"></div>
 
-<script>
-  const toggle = document.getElementById("chatToggle");
-  const box = document.getElementById("chatBox");
-  const form = document.getElementById("chatForm");
-  const textarea = form.querySelector("textarea");
-  const messages = document.getElementById("chatMessages");
+    <form id="chatForm">
+      <textarea name="message" placeholder="Type your message…" rows="1" required></textarea>
+      <button type="submit">Send</button>
+    </form>
+  </div>
 
-  toggle.addEventListener("click", () => {
-    box.style.display = box.style.display === "none" || box.style.display === "" ? "flex" : "none";
-  });
+  <script>
+    /* ---------- your original JavaScript (slightly trimmed) ---------- */
+    const form      = document.getElementById("chatForm");
+    const textarea  = form.querySelector("textarea");
+    const messages  = document.getElementById("chatMessages");
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const text = textarea.value.trim();
-    if (!text) return;
+    // NEW: add welcome line once the DOM is ready
+    window.addEventListener("DOMContentLoaded", () => {
+      appendMessage("Troika","👋 Welcome to Troika Hospital! How can I assist you today?","bot");
+    });
 
-    appendMessage("You", text, "user");
-    textarea.value = "";
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = textarea.value.trim();
+      if (!text) return;
 
-    try {
-      const res = await fetch("/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text })
-      });
+      appendMessage("You", text, "user");
+      textarea.value = "";
 
-      const data = await res.json();
-      appendMessage("Troika", data.reply || "Something went wrong", "bot");
-    } catch (err) {
-      appendMessage("Error", "Failed to get response", "bot");
+      try {
+        const res   = await fetch("/chat", {
+          method : "POST",
+          headers: { "Content-Type": "application/json" },
+          body   : JSON.stringify({ message: text })
+        });
+        const data  = await res.json();
+        appendMessage("Troika", data.reply || "Sorry, I encountered an error. Please try again later.", "bot");
+
+      } catch (err) {
+        appendMessage("Error","Sorry, I encountered an error. Please try again later.","bot");
+      }
+    });
+
+    function appendMessage(sender,text,cls){
+      const div      = document.createElement("div");
+      div.className  = cls;
+      div.textContent= text;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
     }
-  });
-
-  function appendMessage(sender, text, cls) {
-    const p = document.createElement("p");
-    p.className = cls;
-    p.innerHTML = `<strong>${sender}:</strong> ${text}`;
-    messages.appendChild(p);
-    messages.scrollTop = messages.scrollHeight;
-  }
-</script>
-
+  </script>
 </body>
 </html>
